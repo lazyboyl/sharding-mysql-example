@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sharding.mysql.example.dao.ShardingOrderDao">
+    <resultMap id="BaseResultMap" type="com.sharding.mysql.example.entity.ShardingOrder">
+        <id column="order_id" jdbcType="VARCHAR" property="orderId"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="create_time" jdbcType="DATE" property="createTime"/>
+    </resultMap>
+
+
+    <insert id="saveShardingOrder" parameterType="com.sharding.mysql.example.entity.ShardingOrder">
+        insert into t_order(order_id,order_no,create_time) values (#{orderId},#{orderNo},#{createTime})
+    </insert>
+
+</mapper>

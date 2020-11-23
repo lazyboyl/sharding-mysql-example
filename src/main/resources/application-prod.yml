@@ -1,0 +1,53 @@
+spring:
+  shardingsphere:
+    datasource:
+      common:
+        driver-class-name: com.mysql.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+      names: db0,db1
+      db0:
+        driver-class-name: com.mysql.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/db0?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2b8
+        username: root
+        password: '123456'
+      db1:
+        driver-class-name: com.mysql.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+        url: jdbc:mysql://127.0.0.1:3306/db1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2b8
+        username: root
+        password: '123456'
+    rules:
+      sharding:
+        sharding-algorithms:
+          database_inline:
+            type: INLINE
+            props:
+              algorithm-expression: db${order_id % 2}
+        default-database-strategy:
+          inline:
+            sharding-column: order_id
+            algorithm-expression: db${order_id % 2}
+        tables:
+          t_order:
+            # 配置t_order的分库分表的规则
+            actual-data-nodes: db$->{0..1}.t_order$->{0..2}
+            table-strategy:
+              inline:
+                sharding-column: order_id
+                algorithm-expression: t_order${order_id % 3}
+              # 配置t_order的分库规则
+    enabled: true
+
+
+
+mybatis:
+  config-location: classpath:mybatis/mybatis-config.xml
+  mapper-locations: classpath:mybatis/mapper/*.xml
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+
+server:
+  port: 8782
