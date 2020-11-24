@@ -2,11 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sharding.mysql.example.dao.ShardingOrderDao">
     <resultMap id="BaseResultMap" type="com.sharding.mysql.example.entity.ShardingOrder">
-        <id column="order_id" jdbcType="VARCHAR" property="orderId"/>
+        <id column="order_id" jdbcType="INTEGER" property="orderId"/>
         <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
         <result column="create_time" jdbcType="DATE" property="createTime"/>
+        <result column="user_id" jdbcType="INTEGER" property="userId"/>
     </resultMap>
 
+    <resultMap id="ShardingOrderMap" type="com.sharding.mysql.example.entity.ShardingOrder">
+        <id column="order_id" jdbcType="INTEGER" property="orderId"/>
+        <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+        <result column="create_time" jdbcType="DATE" property="createTime"/>
+        <collection property="shardingOrderItemList" ofType="com.sharding.mysql.example.entity.ShardingOrderItem" column="order_id">
+            <id column="order_item_id" jdbcType="INTEGER" property="orderItemId"/>
+            <result column="order_id" jdbcType="INTEGER" property="orderId"/>
+            <result column="order_item_no" jdbcType="VARCHAR" property="orderItemNo"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryShardingOrder" resultMap="ShardingOrderMap">
+        select t.*,ti.* from t_order t inner join t_order_item ti on t.order_id = ti.order_id where t.order_id = #{orderId}
+    </select>
 
     <insert id="saveShardingOrder" parameterType="com.sharding.mysql.example.entity.ShardingOrder">
         insert into t_order(order_id,order_no,create_time) values (#{orderId},#{orderNo},#{createTime})

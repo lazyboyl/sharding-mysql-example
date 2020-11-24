@@ -5,6 +5,8 @@ import com.sharding.mysql.example.service.ShardingOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author linzf
  * @since 2020/11/23
@@ -15,6 +17,17 @@ public class ShardingOrderController {
 
     @Autowired
     private ShardingOrderService shardingOrderService;
+
+
+    /**
+     * 功能描述： 查询订单数据
+     * @param orderId
+     * @return
+     */
+    @PostMapping("queryShardingOrder")
+    public List<ShardingOrder> queryShardingOrder(Integer orderId){
+        return shardingOrderService.queryShardingOrder(orderId);
+    }
 
 
     /**

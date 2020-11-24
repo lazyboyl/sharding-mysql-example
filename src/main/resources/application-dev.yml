@@ -1,5 +1,8 @@
 spring:
   shardingsphere:
+    # 展示修改以后的sql语句
+    props:
+      sql.show: true
     datasource:
       common:
         driver-class-name: com.mysql.jdbc.Driver
@@ -15,6 +18,7 @@ spring:
         password: '123456'
     rules:
       sharding:
+        binding-tables[0]: t_order,t_order_item
         key-generators:
           # 此处必须要配置，否则会导致报错，因为shardingsphere-jdbc-core-spring-boot-starter需要加载此项配置，官网的demo例子有错
           snowflake:
@@ -22,6 +26,11 @@ spring:
             props:
               worker-id: 123
         sharding-algorithms:
+          order-item-inline:
+            type: INLINE
+            props:
+              # 此处写法必须是t_order$->{order_id % 3}不能写为t_order${order_id % 3}，yml不认这种写法
+              algorithm-expression: t_order_item$->{order_id % 3}
           # 规则名称必须使用-不能使用_，否则会导致无法解析，官网例子有错
           table-inline:
             type: INLINE
@@ -33,6 +42,18 @@ spring:
             props:
               algorithm-expression: db$->{order_id % 2}
         tables:
+          t_order_item:
+            # 配置t_order的分库分表的规则
+            actual-data-nodes: db$->{0..1}.t_order_item$->{0..2}
+            table-strategy:
+              standard:
+                sharding-column: order_id
+                sharding-algorithm-name: order-item-inline
+              # 配置t_order的分库规则
+            database-strategy:
+              standard:
+                sharding-column: order_id
+                sharding-algorithm-name: database-inline
           t_order:
             # 配置t_order的分库分表的规则
             actual-data-nodes: db$->{0..1}.t_order$->{0..2}
@@ -48,7 +69,6 @@ spring:
     enabled: true
 
 
-
 mybatis:
   config-location: classpath:mybatis/mybatis-config.xml
   mapper-locations: classpath:mybatis/mapper/*.xml
@@ -59,3 +79,8 @@ pagehelper:
 
 server:
   port: 8782
+
+logging:
+  level:
+    root: INFO
+    com.sharding.mysql.example: DEBUG
